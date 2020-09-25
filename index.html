@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="https://surveyjs.azureedge.net/1.8.4/survey.css" type="text/css" rel="stylesheet" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.10/vue.min.js"></script>
+        <script src="https://surveyjs.azureedge.net/1.8.4/survey.vue.min.js"></script>
+    </head>
+    <body>
+        <div id="surveyContainer"><survey :survey="survey"></survey></div>
+        <div id="surveyResult"></div>
+    </body>
+    <script type="text/javascript">
+
+    var dictionary = `[Dictionary]
+Version=CSPro 7.4
+Label=cawi
+Name=CAWI_DICT
+RecordTypeStart=1
+RecordTypeLen=1
+Positions=Relative
+ZeroFill=No
+DecimalChar=Yes
+SecurityOptions=3D1B7423F8C958AC7B6E602B4AECD531469C58026FC43B707377241BB4283022
+
+[Level]
+Label=cawi Level
+Name=CAWI_LEVEL
+
+[IdItems]
+
+[Item]
+Label=cawi Identification
+Name=CAWI_ID
+Start=2
+Len=3
+ZeroFill=Yes
+
+[Record]
+Label=Demographic
+Name=DEMOGRAPHIC_REC
+RecordTypeValue='1'
+RecordLen=38
+
+[Item]
+Label=Name
+Name=NAME
+Start=5
+Len=30
+DataType=Alpha
+
+[Item]
+Label=Gender
+Name=GENDER
+Start=35
+Len=1
+
+[ValueSet]
+Label=Gender
+Name=GENDER_VS1
+Value=1;Female
+Value=2;Male
+
+[Item]
+Label=Citizenship
+Name=CITIZENSHIP
+Start=36
+Len=1
+
+[ValueSet]
+Label=Citizenship
+Name=CITIZENSHIP_VS1
+Value=1;Moldovan
+Value=2;Romanian
+Value=3;Russian
+Value=4;Other Europina Countries
+Value=5;Other non-Europian Countries
+
+[Item]
+Label=Age Group
+Name=AGE_GROUP
+Start=37
+Len=1
+
+[ValueSet]
+Label=Age Group
+Name=AGE_GROUP_VS1
+Value=1;Under 18
+Value=2;19-29
+Value=3;30-39
+Value=4;40-49
+Value=5;50-59
+Value=6;60-69
+Value=7;70-79
+Value=8;80 and over
+
+[Item]
+Label=Education
+Name=EDUCATION
+Start=38
+Len=1
+
+[ValueSet]
+Label=Education
+Name=EDUCATION_VS1
+Value=1;Primary
+Value=2;Secondary
+Value=3;Tertiari
+Value=4;Master/PhD
+
+[Record]
+Label=Data Request
+Name=DATA_REQUEST
+RecordTypeValue='2'
+RecordLen=5
+
+[Item]
+Label=Have you ever submitted to NBS a request for data provision?
+Name=Q6
+Start=5
+Len=1
+
+[ValueSet]
+Label=Have you ever submitted to NBS a request for data provision?
+Name=Q6_VS1
+Value=1;Yes
+Value=0;No`
+
+function getSurvey(dct, survey) {
+    survey.title = getNextTitle(dct);
+    var levels = getLevels(dct);
+    levels.forEach(level => {
+        var records = getLevelRecords(level);
+        //console.log(records);
+        records.forEach(record => {
+            var page = survey.addNewPage(getNextName(record));
+            var items = getRecordItems(record);
+            items.forEach(item => {
+                var valueSet = getItemValueSet(item)[0];
+                //console.log(valueSet);
+                var values = getValueSetValues(valueSet);
+                var question = page.addNewQuestion(getQuestionType(valueSet), getNextName(item));
+                question.title = getNextTitle(item);
+                question.choices = values;
+            });
+        });
+    });
+}
+
+function getLevels(dct) {
+    var levels = dct.split("\[Level\]");
+    return levels.slice(1, levels.length);
+}
+
+function getLevelRecords(level) {
+    var records =  level.split("\[Record\]");
+    return records.slice(1, records.length);
+}
+
+function getRecordItems(record) {
+    var items = record.split("\[Item\]");
+    return items.slice(1, items.length);
+}
+
+function getItemValueSet(item) {
+    var valueset = item.split("\[ValueSet\]");
+    valueset = valueset.slice(1, valueset.length);
+    return valueset;  
+}
+
+function getQuestionType(valueSet) {
+    if(typeof valueSet !== "undefined") {
+        return "radiogroup";
+    }
+    return "text";
+}
+
+function getValueSetValues(valueSet) {
+    //console.log(valueSet);
+    if(typeof valueSet !== "undefined") {
+        var values = valueSet.split("Value=");
+        
+        values = values.slice(1, values.length);
+        if(typeof values !== "undefined") {
+                    for(i = 0; i < values.length; i++) {
+                        values[i] = values[i].replace(";", "|");
+                    }
+                }
+        return values;
+    }
+}
+
+function getNextName(dictionary) {
+    dictionary = dictionary.slice(dictionary.search("Name=") + "Name=".length, dictionary.length);
+    //console.log(dictionary);
+    return dictionary.substring(0, dictionary.search("\n") + 1);
+}
+
+function getNextTitle(dictionary) {
+    dictionary = dictionary.slice(dictionary.search("Label=") + "Label=".length, dictionary.length);
+    //console.log(dictionary);
+    return dictionary.substring(0, dictionary.search("\n") + 1);
+}
+
+
+var survey = new Survey.Model();
+getSurvey(dictionary, survey);
+
+
+function sendDataToServer(survey) {
+    //send Ajax request to your web server.
+    console.log("I am here");
+    alert("The results are:" + JSON.stringify(survey.data));
+    document
+            .querySelector('#surveyResult')
+            .textContent = "Result JSON:\n" + JSON.stringify(survey.data, null, 3);
+}
+
+//var survey = new Survey.Model(surveyJSON);
+survey
+    .onComplete
+    .add(sendDataToServer);
+new Vue({ el: '#surveyContainer', data: { survey: survey } });
+
+    </script>
+</html>
