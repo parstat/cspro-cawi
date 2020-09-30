@@ -4,6 +4,9 @@
         <link href="https://surveyjs.azureedge.net/1.8.4/survey.css" type="text/css" rel="stylesheet" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.10/vue.min.js"></script>
         <script src="https://surveyjs.azureedge.net/1.8.4/survey.vue.min.js"></script>
+        <script src="./js/cspro.reader.js"></script>
+        <script src="./js/cspro.model.js"></script>
+        <script src="./js/cspro.json.js"></script>
     </head>
     <body>
         <div id="surveyContainer"><survey :survey="survey"></survey></div>
@@ -53,12 +56,13 @@ Label=Gender
 Name=GENDER
 Start=35
 Len=1
+DataType=Alpha
 
 [ValueSet]
 Label=Gender
 Name=GENDER_VS1
-Value=1;Female
-Value=2;Male
+Value=F;Female
+Value=M;Male
 
 [Item]
 Label=Citizenship
@@ -97,15 +101,16 @@ Value=8;80 and over
 Label=Education
 Name=EDUCATION
 Start=38
-Len=1
+Len=4
+DataType=Alpha
 
 [ValueSet]
 Label=Education
 Name=EDUCATION_VS1
-Value=1;Primary
-Value=2;Secondary
-Value=3;Tertiari
-Value=4;Master/PhD
+Value=A    ;Primary
+Value=B    ;Secondary
+Value=C    ;Tertiari
+Value=D    ;Master/PhD
 
 [Record]
 Label=Data Request
@@ -123,92 +128,21 @@ Len=1
 Label=Have you ever submitted to NBS a request for data provision?
 Name=Q6_VS1
 Value=1;Yes
-Value=0;No`
+Value=0;No`;
+
 
 function getSurvey(dct, survey) {
-    survey.title = getNextTitle(dct);
-    var levels = getLevels(dct);
-    levels.forEach(level => {
-        var records = getLevelRecords(level);
-        //console.log(records);
-        records.forEach(record => {
-            var page = survey.addNewPage(getNextName(record));
-            var items = getRecordItems(record);
-            items.forEach(item => {
-                var valueSet = getItemValueSet(item)[0];
-                //console.log(valueSet);
-                var values = getValueSetValues(valueSet);
-                var question = page.addNewQuestion(getQuestionType(valueSet), getNextName(item));
-                question.title = getNextTitle(item);
-                question.choices = values;
-            });
-        });
-    });
+    var csproJson = CSPro2Json.transform(dct);
+    console.log(csproJson);
+    CSProJson2SurveyJson.transform(csproJson, survey);
 }
-
-function getLevels(dct) {
-    var levels = dct.split("\[Level\]");
-    return levels.slice(1, levels.length);
-}
-
-function getLevelRecords(level) {
-    var records =  level.split("\[Record\]");
-    return records.slice(1, records.length);
-}
-
-function getRecordItems(record) {
-    var items = record.split("\[Item\]");
-    return items.slice(1, items.length);
-}
-
-function getItemValueSet(item) {
-    var valueset = item.split("\[ValueSet\]");
-    valueset = valueset.slice(1, valueset.length);
-    return valueset;  
-}
-
-function getQuestionType(valueSet) {
-    if(typeof valueSet !== "undefined") {
-        return "radiogroup";
-    }
-    return "text";
-}
-
-function getValueSetValues(valueSet) {
-    //console.log(valueSet);
-    if(typeof valueSet !== "undefined") {
-        var values = valueSet.split("Value=");
-        
-        values = values.slice(1, values.length);
-        if(typeof values !== "undefined") {
-                    for(i = 0; i < values.length; i++) {
-                        values[i] = values[i].replace(";", "|");
-                    }
-                }
-        return values;
-    }
-}
-
-function getNextName(dictionary) {
-    dictionary = dictionary.slice(dictionary.search("Name=") + "Name=".length, dictionary.length);
-    //console.log(dictionary);
-    return dictionary.substring(0, dictionary.search("\n") + 1);
-}
-
-function getNextTitle(dictionary) {
-    dictionary = dictionary.slice(dictionary.search("Label=") + "Label=".length, dictionary.length);
-    //console.log(dictionary);
-    return dictionary.substring(0, dictionary.search("\n") + 1);
-}
-
 
 var survey = new Survey.Model();
 getSurvey(dictionary, survey);
 
 
 function sendDataToServer(survey) {
-    //send Ajax request to your web server.
-    console.log("I am here");
+    //send Ajax request to your web serverr
     alert("The results are:" + JSON.stringify(survey.data));
     document
             .querySelector('#surveyResult')
