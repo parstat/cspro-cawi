@@ -76,15 +76,40 @@ CSProJson2SurveyJson.transform = function map(csproJson, surveyJson) {
 CSProJson2SurveyJson.addPage = function addPage(csproRecord, surveyJson) {
     var surveyPage = surveyJson.addNewPage(csproRecord.name);
     surveyPage.title = csproRecord.label;
+    if(csproRecord.maxRecords < 2) {
+        csproRecord.items.forEach(csProRecordItem => {
+            CSProJson2SurveyJson.addQuestionToPage(csProRecordItem, surveyPage)
+        })
+    }
+    else {
+        CSProJson2SurveyJson.addDynamicPanel(csproRecord, surveyPage)
+    }
+}
+
+CSProJson2SurveyJson.addDynamicPanel = function addDynamicPanel(csproRecord, surveyPage) {
+    var dynamicPanel = surveyPage.addNewQuestion("paneldynamic", csproRecord.label);
+    var panel = new Survey.PanelModel();
     csproRecord.items.forEach(csProRecordItem => {
-        CSProJson2SurveyJson.addQuestionToPage(csProRecordItem, surveyPage)
+        CSProJson2SurveyJson.addTemplateQuestion(csProRecordItem, panel)
     })
+    panel.elements.forEach(el => dynamicPanel.templateElements.push(el));
+    dynamicPanel.maxPanelCount = csproRecord.maxRecords;
+}
+
+CSProJson2SurveyJson.addTemplateQuestion = function addTemplateQuestion(csProItem, dynamicPanel) {
+    var templateQuestion = dynamicPanel.addNewQuestion(CSProJson2SurveyJson.getQuestionType(csProItem), csProItem.name);
+    templateQuestion.title = csProItem.label;
+    templateQuestion.maxLength = csProItem.len;
+    if(csProItem.valueSets.length > 0) {
+        templateQuestion.choices = csProItem.valueSets[0].values;
+    }
 }
 
 CSProJson2SurveyJson.addQuestionToPage = function addQuestionToPage(csProItem, surveyPage) {
 
     var surveyPageQuestion = surveyPage.addNewQuestion(CSProJson2SurveyJson.getQuestionType(csProItem), csProItem.name);
     surveyPageQuestion.title = csProItem.label;
+    surveyPageQuestion.maxLength = csProItem.len;
     if(csProItem.valueSets.length > 0) {
         surveyPageQuestion.choices = csProItem.valueSets[0].values;
     }

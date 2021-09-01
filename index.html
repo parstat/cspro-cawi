@@ -117,6 +117,7 @@ Label=Data Request
 Name=DATA_REQUEST
 RecordTypeValue='2'
 RecordLen=5
+MaxRecord=2
 
 [Item]
 Label=Have you ever submitted to NBS a request for data provision?
@@ -133,7 +134,7 @@ Value=0;No`;
 
 function getSurvey(dct, survey) {
     var csproJson = CSPro2Json.transform(dct);
-    console.log(csproJson);
+    //console.log(csproJson);
     CSProJson2SurveyJson.transform(csproJson, survey);
 }
 

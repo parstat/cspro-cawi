@@ -29,6 +29,8 @@ var Record = {
     Model: function(record) {
         this.name = DictionaryReader.getNextName(record);
         this.label = DictionaryReader.getNextTitle(record);
+        this.recordLen = DictionaryReader.getRecordLen(record);
+        this.maxRecords = DictionaryReader.getMaxRecords(record);
         this.items = [];
     }
 }
@@ -55,7 +57,7 @@ var ValueSet = {
 var Value = {
     Model: function(value) {
         var keyValue = value.split(";");
-        this.key = keyValue[0];
-        this.value = keyValue[1];
+        this.value = keyValue[0];
+        this.text = keyValue[1];
     }
 }

@@ -73,6 +73,15 @@ DictionaryReader.getItemStart = function getStart(item) {
     return DictionaryReader.getProperty(item, "Start=")
 }
 
+DictionaryReader.getRecordLen = function getRecordLen(record) {
+    return DictionaryReader.getProperty(record, "RecordLen=");
+}
+
+DictionaryReader.getMaxRecords = function getMaxRecords(record) {
+    var maxRecords =  DictionaryReader.getProperty(record, "MaxRecord=")
+    return maxRecords !== "" ? maxRecords : "1";
+}
+
 DictionaryReader.getItemDataType = function getDataType(item) {
     var dataTypeIndex = item.search("DataType=");
     if( dataTypeIndex != -1) {
