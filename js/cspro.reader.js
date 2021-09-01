@@ -78,7 +78,7 @@ DictionaryReader.getRecordLen = function getRecordLen(record) {
 }
 
 DictionaryReader.getMaxRecords = function getMaxRecords(record) {
-    var maxRecords =  DictionaryReader.getProperty(record, "MaxRecord=")
+    var maxRecords =  DictionaryReader.getProperty(record, "MaxRecords=")
     return maxRecords !== "" ? maxRecords : "1";
 }
 
