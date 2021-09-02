@@ -82,9 +82,43 @@ CSProJson2SurveyJson.addPage = function addPage(csproRecord, surveyJson) {
         })
     }
     else {
-        CSProJson2SurveyJson.addDynamicPanel(csproRecord, surveyPage)
+        CSProJson2SurveyJson.addDynamicMatrix(csproRecord, surveyPage)
     }
 }
+
+CSProJson2SurveyJson.addDynamicMatrix = function addDynamicMatrix(csproRecord, surveyPage) {
+    var dynamicMatrix = surveyPage.addNewQuestion("matrixdynamic", csproRecord.label);
+    dynamicMatrix.horizontalScroll = true;
+    dynamicMatrix.columns = [];
+    csproRecord.items.forEach(csProRecordItem => {
+        CSProJson2SurveyJson.addNewMatrixColumn(csProRecordItem, dynamicMatrix)
+    })
+    dynamicMatrix.maxRowCount = csproRecord.maxRecords;
+}
+
+CSProJson2SurveyJson.addNewMatrixColumn = function addNewMatrixColumn(csproItem, dynamicMatrix) {
+    var column = new Survey.MatrixDropdownColumn();
+    column.cellType = CSProJson2SurveyJson.getQuestionType(csproItem);
+    column.name = csproItem.name;
+    column.title = csproItem.label;
+    column.maxLength = csproItem.len;
+    console.log(csproItem);
+    if(csproItem.dataType === "Numeric") {
+        if(csproItem.len == 8) {
+            column.inputType = "date";
+        }
+        else {
+            column.inputType = "number";
+        }
+    }
+    if(csproItem.valueSets.length > 0) {
+        column.choices = csproItem.valueSets[0].values;
+    }
+    //console.log(column);
+    //dynamicMatrix.columns = [];
+    dynamicMatrix.columns.push(column);
+}
+
 
 CSProJson2SurveyJson.addDynamicPanel = function addDynamicPanel(csproRecord, surveyPage) {
     var dynamicPanel = surveyPage.addNewQuestion("paneldynamic", csproRecord.label);

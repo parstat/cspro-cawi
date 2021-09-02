@@ -15,121 +15,127 @@
     <script type="text/javascript">
 
     var dictionary = `[Dictionary]
-Version=CSPro 7.4
-Label=cawi
-Name=CAWI_DICT
+Version=CSPro 7.6
+Label=testApp
+Name=TESTAPP_DICT
 RecordTypeStart=1
 RecordTypeLen=1
 Positions=Relative
 ZeroFill=No
 DecimalChar=Yes
-SecurityOptions=3D1B7423F8C958AC7B6E602B4AECD531469C58026FC43B707377241BB4283022
+SecurityOptions=9934C97A920A2B35EFF8C82B8B866E773958CB72C14B1418A77AA2AEB8240E37
 
 [Level]
-Label=cawi Level
-Name=CAWI_LEVEL
+Label=testApp Level
+Name=TESTAPP_LEVEL
 
 [IdItems]
 
 [Item]
-Label=cawi Identification
-Name=CAWI_ID
+Label=ID Application
+Name=TESTAPP_ID
 Start=2
-Len=3
-ZeroFill=Yes
+Len=5
 
 [Record]
-Label=Demographic
-Name=DEMOGRAPHIC_REC
+Label=Infos Parcelles
+Name=TESTAPP_REC
 RecordTypeValue='1'
-RecordLen=38
+MaxRecords=5
+RecordLen=56
 
 [Item]
-Label=Name
-Name=NAME
-Start=5
-Len=30
+Label=Numero Parcelle
+Name=NUMERO_PARCELLE
+Start=7
+Len=1
+
+[Item]
+Label=Localisation Parcelle
+Name=LIEU
+Start=8
+Len=20
 DataType=Alpha
 
 [Item]
-Label=Gender
-Name=GENDER
-Start=35
+Label=Tenure Parcelle
+Name=TENURE_PARCELLE
+Start=28
 Len=1
+
+[ValueSet]
+Label=Tenure Parcelle
+Name=TENURE_PARCELLE_VS1
+Value=1;Proprietaire
+Value=2;Metayer
+Value=3;Heritage
+Value=4;Usurfruit
+
+[Item]
+Label=Arbres fruitiers present sur parcelle
+Name=ARBRES_FRUITIETS_PRESENT_SUR_PARCELLE
+Start=29
+Len=28
 DataType=Alpha
 
 [ValueSet]
-Label=Gender
-Name=GENDER_VS1
-Value=F;Female
-Value=M;Male
-
-[Item]
-Label=Citizenship
-Name=CITIZENSHIP
-Start=36
-Len=1
-
-[ValueSet]
-Label=Citizenship
-Name=CITIZENSHIP_VS1
-Value=1;Moldovan
-Value=2;Romanian
-Value=3;Russian
-Value=4;Other Europina Countries
-Value=5;Other non-Europian Countries
-
-[Item]
-Label=Age Group
-Name=AGE_GROUP
-Start=37
-Len=1
-
-[ValueSet]
-Label=Age Group
-Name=AGE_GROUP_VS1
-Value=1;Under 18
-Value=2;19-29
-Value=3;30-39
-Value=4;40-49
-Value=5;50-59
-Value=6;60-69
-Value=7;70-79
-Value=8;80 and over
-
-[Item]
-Label=Education
-Name=EDUCATION
-Start=38
-Len=4
-DataType=Alpha
-
-[ValueSet]
-Label=Education
-Name=EDUCATION_VS1
-Value=A    ;Primary
-Value=B    ;Secondary
-Value=C    ;Tertiari
-Value=D    ;Master/PhD
+Label=Arbres fruitiers present sur parcelle
+Name=ARBRES_FRUITIETS_PRESENT_SUR_PARCELLE_VS1
+Value='01                          ';Manguier
+Value='02                          ';Avocatier
+Value='03                          ';Oranger
+Value='04                          ';Cerisier
+Value='05                          ';Amandier
+Value='06                          ';Citronnier
+Value='07                          ';Mandarinier
+Value='08                          ';Tamarinier
+Value='09                          ';Goyavier
+Value='10                          ';Papayer
+Value='11                          ';Anacadier
+Value='12                          ';Pamplemoussier
+Value='13                          ';Cocotier
+Value='14                          ';Bigaradier
 
 [Record]
-Label=Data Request
-Name=DATA_REQUEST
+Label=Details Arbres
+Name=DETAILS_ARBRES
 RecordTypeValue='2'
-RecordLen=5
-MaxRecords=2
+MaxRecords=60
+RecordLen=74
 
 [Item]
-Label=Have you ever submitted to NBS a request for data provision?
-Name=Q6
-Start=5
-Len=1
+Label=Code Arbre
+Name=CODE_ARBRE
+Start=7
+Len=18
+DataType=Alpha
 
-[ValueSet]
-Label=Have you ever submitted to NBS a request for data provision?
-Name=Q6_VS1
-Value=1;Yes
-Value=0;No`;
+[Item]
+Label=Nom Arbre
+Name=NOM_ARBRE
+Start=25
+Len=20
+DataType=Alpha
+
+[Item]
+Label=Variete arbre
+Name=VARIETE_ARBRE
+Start=45
+Len=20
+DataType=Alpha
+
+[Item]
+Label=Nombre Arbre
+Name=NOMBRE_ARBRE
+Start=65
+Len=2
+
+[Item]
+Label=Date de Plantation
+Name=DATE_DE_PLANTATION
+Start=67
+Len=8
+`;
 
 
 function getSurvey(dct, survey) {
