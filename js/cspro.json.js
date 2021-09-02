@@ -2,6 +2,19 @@ CSProJson2SurveyJson = {};
 
 CSPro2Json = {};
 
+//add tagbox into matrix columns (run-time)
+Survey.matrixDropdownColumnTypes.tagbox = {
+    properties: [
+        "choices", "choicesOrder", "choicesByUrl", "otherText"
+    ],
+    onCellQuestionUpdate: function (cellQuestion, column, question, data) {
+        Survey
+            .matrixDropdownColumnTypes
+            .checkbox
+            .onCellQuestionUpdate(cellQuestion, column, question, data);
+    }
+};
+
 CSPro2Json.transform = function transform(dictionary) {
     var jsonDict = new Dictionary.Model(dictionary);
     var levels = DictionaryReader.getLevels(dictionary);
@@ -99,7 +112,7 @@ CSProJson2SurveyJson.addDynamicMatrix = function addDynamicMatrix(csproRecord, s
 
 CSProJson2SurveyJson.addNewMatrixColumn = function addNewMatrixColumn(csproItem, dynamicMatrix) {
     var column = new Survey.MatrixDropdownColumn();
-    column.cellType = CSProJson2SurveyJson.getQuestionType(csproItem);
+    column.cellType = CSProJson2SurveyJson.getQuestionType(csproItem, true);
     column.name = csproItem.name;
     column.title = csproItem.label;
     column.maxLength = csproItem.len;
@@ -132,7 +145,7 @@ CSProJson2SurveyJson.addDynamicPanel = function addDynamicPanel(csproRecord, sur
 }
 
 CSProJson2SurveyJson.addTemplateQuestion = function addTemplateQuestion(csProItem, dynamicPanel) {
-    var templateQuestion = dynamicPanel.addNewQuestion(CSProJson2SurveyJson.getQuestionType(csProItem), csProItem.name);
+    var templateQuestion = dynamicPanel.addNewQuestion(CSProJson2SurveyJson.getQuestionType(csProItem, false), csProItem.name);
     templateQuestion.title = csProItem.label;
     templateQuestion.maxLength = csProItem.len;
     if(csProItem.valueSets.length > 0) {
@@ -142,7 +155,7 @@ CSProJson2SurveyJson.addTemplateQuestion = function addTemplateQuestion(csProIte
 
 CSProJson2SurveyJson.addQuestionToPage = function addQuestionToPage(csProItem, surveyPage) {
 
-    var surveyPageQuestion = surveyPage.addNewQuestion(CSProJson2SurveyJson.getQuestionType(csProItem), csProItem.name);
+    var surveyPageQuestion = surveyPage.addNewQuestion(CSProJson2SurveyJson.getQuestionType(csProItem, false), csProItem.name);
     surveyPageQuestion.title = csProItem.label;
     surveyPageQuestion.maxLength = csProItem.len;
     if(csProItem.valueSets.length > 0) {
@@ -150,10 +163,16 @@ CSProJson2SurveyJson.addQuestionToPage = function addQuestionToPage(csProItem, s
     }
 }
 
-CSProJson2SurveyJson.getQuestionType = function(csProItem) {
-    if(csProItem.valueSets.length > 0) {
-        if(csProItem.dataType === "Alpha" && csProItem.len > 1) {
+CSProJson2SurveyJson.getQuestionType = function(csProItem, isMatrix) {
+    if(csProItem.valueSets.length > 0 && csProItem.valueSets[0].values.length > 1) {
+        if(csProItem.dataType === "Alpha" && csProItem.valueSets[0].values[0].value.length > 1 && csProItem.valueSets[0].values[0].value.slice(1, -1).trim().length < csProItem.len) {
+            if(isMatrix) {
+                return "tagbox";
+            }
             return "checkbox";
+        }
+        if(isMatrix) {
+            return "dropdown";
         }
         if(csProItem.valueSets[0].values.length < 6) {
             return "radiogroup";
@@ -162,7 +181,3 @@ CSProJson2SurveyJson.getQuestionType = function(csProItem) {
     }
     return "text";
 } 
-
-
-
-
