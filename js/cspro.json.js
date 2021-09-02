@@ -90,6 +90,7 @@ CSProJson2SurveyJson.addDynamicMatrix = function addDynamicMatrix(csproRecord, s
     var dynamicMatrix = surveyPage.addNewQuestion("matrixdynamic", csproRecord.label);
     dynamicMatrix.horizontalScroll = true;
     dynamicMatrix.columns = [];
+    dynamicMatrix.rowCount = 1;
     csproRecord.items.forEach(csProRecordItem => {
         CSProJson2SurveyJson.addNewMatrixColumn(csProRecordItem, dynamicMatrix)
     })
@@ -114,7 +115,7 @@ CSProJson2SurveyJson.addNewMatrixColumn = function addNewMatrixColumn(csproItem,
     if(csproItem.valueSets.length > 0) {
         column.choices = csproItem.valueSets[0].values;
     }
-    //console.log(column);
+    console.log(column);
     //dynamicMatrix.columns = [];
     dynamicMatrix.columns.push(column);
 }

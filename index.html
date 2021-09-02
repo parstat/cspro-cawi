@@ -7,6 +7,7 @@
         <script src="./js/cspro.reader.js"></script>
         <script src="./js/cspro.model.js"></script>
         <script src="./js/cspro.json.js"></script>
+        <link href="https://unpkg.com/survey-core@1.8.64/modern.min.css" type="text/css" rel="stylesheet"/>
     </head>
     <body>
         <div id="surveyContainer"><survey :survey="survey"></survey></div>
@@ -138,11 +139,16 @@ Len=8
 `;
 
 
+Survey
+    .StylesManager
+    .applyTheme("modern");
+
 function getSurvey(dct, survey) {
     var csproJson = CSPro2Json.transform(dct);
     //console.log(csproJson);
     CSProJson2SurveyJson.transform(csproJson, survey);
-}
+    //console.log(survey);
+};
 
 var survey = new Survey.Model();
 getSurvey(dictionary, survey);
@@ -154,7 +160,7 @@ function sendDataToServer(survey) {
     document
             .querySelector('#surveyResult')
             .textContent = "Result JSON:\n" + JSON.stringify(survey.data, null, 3);
-}
+};
 
 //var survey = new Survey.Model(surveyJSON);
 survey
