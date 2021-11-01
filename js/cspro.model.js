@@ -1,3 +1,8 @@
+var Logic = {
+    Model: function(logic) {
+        this.text = logic;
+    }
+}
 var Dictionary = {
     Model: function(dictionary) {
         this.text = dictionary;
@@ -41,6 +46,7 @@ var Item = {
         this.label = DictionaryReader.getNextTitle(item);
         this.len = DictionaryReader.getItemLen(item);
         this.dataType = DictionaryReader.getItemDataType(item);
+        this.askIf = "";
         //this.itemType = DictionaryReader.getItemType(item);
         this.valueSets = [];
     }

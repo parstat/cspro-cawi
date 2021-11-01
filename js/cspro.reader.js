@@ -1,4 +1,5 @@
 DictionaryReader = {};
+LogicReader = {};
 
 DictionaryReader.getNextName = function getNextName(dictionary) {
     dictionary = dictionary.slice(dictionary.search("Name=") + "Name=".length, dictionary.length);
@@ -110,3 +111,19 @@ DictionaryReader.getItemType = function getQuestionType(valueSet, dataType, len,
     return "text"; //for all main types text can be used
 }
 
+LogicReader.getAskIf = function getAskIf(logic, itemName) {
+    var  searchStart = new RegExp("PROC " + itemName, "i");
+    var searchEnd = new RegExp("POSTPROC ", "i");
+    console.log(searchStart);
+    console.log(searchEnd);
+    rule = logic.slice(logic.search(searchStart), logic.search(searchEnd));
+    rule = rule.split("ask if")[1];
+    if(!(typeof(rule) === 'undefined')) {
+        rule = rule.split("\n")[0];
+    }
+    else {
+        rule = "";
+    }
+    console.log(rule);
+    return rule;
+}

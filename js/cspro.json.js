@@ -2,6 +2,8 @@ CSProJson2SurveyJson = {};
 
 CSPro2Json = {};
 
+TextLogic = {};
+
 //add tagbox into matrix columns (run-time)
 Survey.matrixDropdownColumnTypes.tagbox = {
     properties: [
@@ -15,9 +17,14 @@ Survey.matrixDropdownColumnTypes.tagbox = {
     }
 };
 
-CSPro2Json.transform = function transform(dictionary) {
+CSPro2Json.logic = function getLogic(logic) {
+    TextLogic = new Logic.Model(logic);
+}
+
+CSPro2Json.transform = function transform(dictionary, logic) {
     var jsonDict = new Dictionary.Model(dictionary);
     var levels = DictionaryReader.getLevels(dictionary);
+    CSPro2Json.logic(logic);
     CSPro2Json.addLevels(levels, jsonDict);
     return jsonDict;
 }
@@ -52,6 +59,7 @@ CSPro2Json.addRecords = function addRecords(records, jsonLevel) {
 CSPro2Json.addItems = function addItems(items, jsonRecord) {
     items.forEach(item => {
         var jsonItem = new Item.Model(item);
+        jsonItem.askIf = LogicReader.getAskIf(TextLogic.text, jsonItem.name);
         var valueSets = DictionaryReader.getItemValueSets(item);
         CSPro2Json.addValueSets(valueSets, jsonItem);
         jsonRecord.items.push(jsonItem);
@@ -148,6 +156,7 @@ CSProJson2SurveyJson.addTemplateQuestion = function addTemplateQuestion(csProIte
     var templateQuestion = dynamicPanel.addNewQuestion(CSProJson2SurveyJson.getQuestionType(csProItem, false), csProItem.name);
     templateQuestion.title = csProItem.label;
     templateQuestion.maxLength = csProItem.len;
+    templateQuestion.enableIf = csProItem.askIf;
     if(csProItem.valueSets.length > 0) {
         templateQuestion.choices = csProItem.valueSets[0].values;
     }
@@ -158,6 +167,12 @@ CSProJson2SurveyJson.addQuestionToPage = function addQuestionToPage(csProItem, s
     var surveyPageQuestion = surveyPage.addNewQuestion(CSProJson2SurveyJson.getQuestionType(csProItem, false), csProItem.name);
     surveyPageQuestion.title = csProItem.label;
     surveyPageQuestion.maxLength = csProItem.len;
+    if(!(csProItem.askIf === "")) {
+        surveyPageQuestion.enableIf = "{" + csProItem.askIf.trim()
+        .replaceAll(" ", "")
+        .replace("=", "}==")
+        .replace(";", "");
+    }
     if(csProItem.valueSets.length > 0) {
         surveyPageQuestion.choices = csProItem.valueSets[0].values;
     }
