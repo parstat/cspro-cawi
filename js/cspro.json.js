@@ -99,11 +99,11 @@ CSProJson2SurveyJson.addPage = function addPage(csproRecord, surveyJson) {
     surveyPage.title = csproRecord.label;
     if(csproRecord.maxRecords < 2) {
         csproRecord.items.forEach(csProRecordItem => {
-            CSProJson2SurveyJson.addQuestionToPage(csProRecordItem, surveyPage)
+            CSProJson2SurveyJson.addQuestionToPage(csProRecordItem, surveyPage);
         })
     }
     else {
-        CSProJson2SurveyJson.addDynamicMatrix(csproRecord, surveyPage)
+        CSProJson2SurveyJson.addDynamicMatrix(csproRecord, surveyPage);
     }
 }
 
@@ -124,7 +124,7 @@ CSProJson2SurveyJson.addNewMatrixColumn = function addNewMatrixColumn(csproItem,
     column.name = csproItem.name;
     column.title = csproItem.label;
     column.maxLength = csproItem.len;
-    console.log(csproItem);
+    //console.log(csproItem);
     if(csproItem.dataType === "Numeric") {
         if(csproItem.len == 8) {
             column.inputType = "date";
@@ -136,7 +136,7 @@ CSProJson2SurveyJson.addNewMatrixColumn = function addNewMatrixColumn(csproItem,
     if(csproItem.valueSets.length > 0) {
         column.choices = csproItem.valueSets[0].values;
     }
-    console.log(column);
+    //console.log(column);
     //dynamicMatrix.columns = [];
     dynamicMatrix.columns.push(column);
 }
@@ -156,7 +156,18 @@ CSProJson2SurveyJson.addTemplateQuestion = function addTemplateQuestion(csProIte
     var templateQuestion = dynamicPanel.addNewQuestion(CSProJson2SurveyJson.getQuestionType(csProItem, false), csProItem.name);
     templateQuestion.title = csProItem.label;
     templateQuestion.maxLength = csProItem.len;
-    templateQuestion.enableIf = csProItem.askIf;
+    if(csProItem.dataType === "Numeric") {
+        if(csProItem.len == 8) {
+            //console.log(csProItem.name);    
+            surveyPageQuestion.inputType = "date";
+        }
+        else {
+            surveyPageQuestion.inputType = "number";
+        }
+    }
+    if(typeof csProItem.askIf !== "undefined") {
+        templateQuestion.enableIf = ruleTransform(csProItem.askIf);
+    }
     if(csProItem.valueSets.length > 0) {
         templateQuestion.choices = csProItem.valueSets[0].values;
     }
@@ -167,20 +178,75 @@ CSProJson2SurveyJson.addQuestionToPage = function addQuestionToPage(csProItem, s
     var surveyPageQuestion = surveyPage.addNewQuestion(CSProJson2SurveyJson.getQuestionType(csProItem, false), csProItem.name);
     surveyPageQuestion.title = csProItem.label;
     surveyPageQuestion.maxLength = csProItem.len;
-    if(!(csProItem.askIf === "")) {
-        surveyPageQuestion.enableIf = "{" + csProItem.askIf.trim()
-        .replaceAll(" ", "")
-        .replace("=", "}==")
-        .replace(";", "");
+    if(csProItem.dataType === "Numeric") {
+        if(csProItem.len == 8) {
+            //console.log(csProItem.name);    
+            surveyPageQuestion.inputType = "date";
+        }
+        else {
+            surveyPageQuestion.inputType = "number";
+        }
+    }
+    if(typeof csProItem.askIf !== "undefined") {
+        surveyPageQuestion.enableIf = ruleTransform(csProItem.askIf);
     }
     if(csProItem.valueSets.length > 0) {
         surveyPageQuestion.choices = csProItem.valueSets[0].values;
     }
 }
 
+function ruleTransform(rule) {
+    var surveyJsRule = "{" + rule.replaceAll(" ", "")
+                        .replaceAll("=", "==")
+                        .replaceAll(";", "")
+                        .replaceAll("<>", "} != ")
+                        .replaceAll(new RegExp("and", "ig"), " and {")
+                        .replaceAll(new RegExp("or", "ig"), " or {")
+                        .replaceAll(">==", "} >= ")
+                        .replaceAll("<==", "} <= ")
+                        .replaceAll("==", "} == ");
+    if(surveyJsRule.toLowerCase().indexOf("ischecked") != -1) {
+        surveyJsRule = isCheckedTransform(surveyJsRule);
+    }
+    return surveyJsRule;
+} 
+
+function isCheckedTransform(rule) {
+    console.log(rule);
+    var surveyJsRule = rule.replaceAll("{", "")
+                           .replaceAll("}", "");
+    var checkedVariable = surveyJsRule.split(",")[1];
+    if(typeof checkedVariable !== 'undefined') {
+        checkedVariable = checkedVariable.split(")")[0];
+    }
+    var checkedValue = rule.split("\"")[1];
+    console.log(checkedValue);
+    var surveyJsRule = "{"  + checkedVariable  + "} contains ";
+    if(isNumeric(checkedValue)) {
+        surveyJsRule +=  checkedValue;
+    } else {
+        surveyJsRule +=  "'" + checkedValue + "'";
+    }
+    return surveyJsRule;
+}
+
+//return false if blank, null, undefined or NaN.
+function isNumeric(v) {
+    if (v == null || v == undefined || v== '') {
+       return false;
+    }
+                          
+    return !isNaN(v) && isFinite(v);
+  }
+
+
 CSProJson2SurveyJson.getQuestionType = function(csProItem, isMatrix) {
+    if(csProItem.dataType === "Numeric" && csProItem.len === "8") {
+        return "text";
+    }
     if(csProItem.valueSets.length > 0 && csProItem.valueSets[0].values.length > 1) {
-        if(csProItem.dataType === "Alpha" && csProItem.valueSets[0].values[0].value.length > 1 && csProItem.valueSets[0].values[0].value.slice(1, -1).trim().length < csProItem.len) {
+        //if(csProItem.dataType === "Alpha" && csProItem.valueSets[0].values[0].value.length > 1 && csProItem.valueSets[0].values[0].value.slice(1, -1).trim().length < csProItem.len) {
+        if(csProItem.dataType === "Alpha" && csProItem.len > 1) {
             if(isMatrix) {
                 return "tagbox";
             }
@@ -194,5 +260,6 @@ CSProJson2SurveyJson.getQuestionType = function(csProItem, isMatrix) {
         } 
         return "dropdown";
     }
+   
     return "text";
 } 

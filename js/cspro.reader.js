@@ -8,7 +8,7 @@ DictionaryReader.getNextName = function getNextName(dictionary) {
 
 DictionaryReader.getNextTitle = function getNextTitle(dictionary) {
     dictionary = dictionary.slice(dictionary.search("Label=") + "Label=".length, dictionary.length);
-    return dictionary.substring(0, dictionary.search("\n") + 1);
+    return dictionary.substring(0, dictionary.search("\n") + 1).split("|")[0];
 }
 
 
@@ -92,38 +92,24 @@ DictionaryReader.getItemDataType = function getDataType(item) {
     return "Numeric";
 }
 
-DictionaryReader.getItemType = function getQuestionType(valueSet, dataType, len, size) {    
-    if(typeof valueSet !== "undefined") {
-        //[Item] in cspro includes a [ValueSet]
-        //This means that it is a single select question type
-        //or multi select question type 
-        if(dataType === "Alpha" && len > 1) {
-            //usually Item of datatype "Alpha" and Len > 1 are multi select in CSPro
-            
-            return "checkbox"; //survey js multi select is "checkbox"
-            
-        }
-        if(size < 6) { //single select, radiobutton if items in valueset are less then 6
-            return "radiogroup"; 
-        }
-        return "dropdown";
-    }
-    return "text"; //for all main types text can be used
-}
+
 
 LogicReader.getAskIf = function getAskIf(logic, itemName) {
-    var  searchStart = new RegExp("PROC " + itemName, "i");
-    var searchEnd = new RegExp("POSTPROC ", "i");
-    console.log(searchStart);
-    console.log(searchEnd);
-    rule = logic.slice(logic.search(searchStart), logic.search(searchEnd));
-    rule = rule.split("ask if")[1];
-    if(!(typeof(rule) === 'undefined')) {
-        rule = rule.split("\n")[0];
+    var  searchStart = new RegExp("PROC " + itemName, "gi");
+    var searchEnd = new RegExp("PROC", "gi");
+    //console.log(searchStart);
+   
+    var part = logic.split(searchStart)[1];
+    //
+    //console.log(part);
+    var rule = "";
+    if(typeof part !== 'undefined') {
+        rule = part.slice(0, logic.search(searchEnd));
+        rule = rule.split("ask if")[1];
+        if(typeof rule !== 'undefined') {
+            rule = rule.split("\n")[0];
+        }
     }
-    else {
-        rule = "";
-    }
-    console.log(rule);
+    //console.log(rule);
     return rule;
 }

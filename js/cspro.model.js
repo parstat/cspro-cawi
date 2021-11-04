@@ -63,7 +63,12 @@ var ValueSet = {
 var Value = {
     Model: function(value) {
         var keyValue = value.split(";");
-        this.value = keyValue[0];
+        this.value = keyValue[0].replaceAll("'", "").trim();
         this.text = keyValue[1];
+        if(typeof this.text === "string") {
+            //get the default language
+            //TODO multilingual support
+            this.text = this.text.split("|")[0].trim();
+        }
     }
 }
